@@ -1,3 +1,4 @@
+import java.lang.IllegalArgumentException
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
@@ -15,10 +16,10 @@ fun main(){
 }
 
 class Deck(private val deckType: DeckType){
-    private val heartCards = HeartsCard()
-    private val tilesCards = TilesCard()
-    private val cloverCards = CloversCard()
-    private val pikeCards = PikeCard()
+    private val heartCards = SomeCardFactory.getCardFactory<HeartsCard>()
+    private val tilesCards = SomeCardFactory.getCardFactory<TilesCard>()
+    private val cloverCards = SomeCardFactory.getCardFactory<CloversCard>()
+    private val pikeCards = SomeCardFactory.getCardFactory<PikeCard>()
     private val cards = Stack<Card>()
     init{
         initializeDeck()
@@ -116,6 +117,17 @@ enum class DeckType(val size: Int){
 abstract class SomeCardFactory{
     abstract val cardType: CardType
     private val cards = mutableListOf<Card>()
+
+    companion object{
+        inline fun <reified T> getCardFactory(): SomeCardFactory =
+            when (T::class){
+                HeartsCard::class -> HeartsCard()
+                TilesCard::class -> TilesCard()
+                CloversCard::class -> CloversCard()
+                PikeCard::class -> PikeCard()
+                else -> throw IllegalArgumentException("boo")
+            }
+    }
 
     fun initializeCardList(cardCount: Int){
         val min = max(2, 14 - cardCount + 1)
